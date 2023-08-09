@@ -1,9 +1,6 @@
 # Vision Transformer For Image Quality Perception Of Individual Observers
 
-## Name
-Vision Transformer For Image Quality Perception Of Individual Observers.
-
-## Description
+### Description
 desc
 
 ## Visuals
