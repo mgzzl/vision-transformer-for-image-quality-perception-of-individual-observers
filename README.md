@@ -13,13 +13,11 @@ Images
 - Linux and Windows are supported, but we recommend Linux for performance and compatibility reasons.
 - NVIDIA GPU. I have done all testing and development using RTX 3090 GPU.
 - 64-bit Python 3.11 and PyTorch 2.0 (or later). See [pytorch.org](https://pytorch.org) for PyTorch install instructions.
-- CUDA toolkit 11.8 or later
+- CUDA toolkit 11.8 or later.
 
 ## Installation
 ```
-git remote add origin https://mygit.th-deg.de/mg06201/vision-transformer-for-image-quality-perception-of-individual-observers.git
-git branch -M main
-git push -uf origin main
+git clone https://mygit.th-deg.de/mg06201/vision-transformer-for-image-quality-perception-of-individual-observers.git
 cd vision-transformer-for-image-quality-perception-of-individual-observers
 conda env create -f environment.yml
 conda activate vit_iqa
