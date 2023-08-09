@@ -34,6 +34,7 @@ For comments, queries and help I can be reached at the following email adress: m
 - [ ] Train ViT on all distored images
 - [ ] Train ViT on idividuals
 - [ ] Visualize Attention-Scores
+- [ ] Compare Attention-Scores of ViT with GRADCAM of JPEGResNet50
 ***
 - [x] Write Training Script
 - [x] Convert Matlab rating playlists to csv
