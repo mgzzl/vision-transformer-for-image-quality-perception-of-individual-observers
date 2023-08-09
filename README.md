@@ -29,11 +29,11 @@ jupyter notebook
 For comments, queries and help I can be reached at the following email adress: max.geissler@stud.th-deg.de
 
 ## ToDo's
-[] Integrate pretrained ViT-Model
-[] Find optimal parameter values
-[] Train ViT on all distored images
-[] Train ViT on idividuals
-[] Visualize Attention-Scores
+- [] Integrate pretrained ViT-Model
+- [] Find optimal parameter values
+- [] Train ViT on all distored images
+- [] Train ViT on idividuals
+- [] Visualize Attention-Scores
 
 ## Acknowledgment
 My appreciation goes to
