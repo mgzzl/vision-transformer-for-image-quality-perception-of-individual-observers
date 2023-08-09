@@ -35,6 +35,12 @@ For comments, queries and help I can be reached at the following email adress: m
 - [ ] Train ViT on idividuals
 - [ ] Visualize Attention-Scores
 
+- [x] Write Training Script
+- [x] Convert Matlab rating playlists to csv
+- [x] Visualize Confusion-Map
+- [x] Visualize dataset distribution
+- [x] Visualize training results
+
 ## Acknowledgment
 My appreciation goes to
 - Marcus Barkowsky, my dedicated professor and mentor.
