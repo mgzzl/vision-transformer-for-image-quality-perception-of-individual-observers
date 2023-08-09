@@ -28,8 +28,15 @@ jupyter notebook
 ## Support
 For comments, queries and help I can be reached at the following email adress: max.geissler@stud.th-deg.de
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+## ToDo's
+[] Integrate pretrained ViT-Model
+[] Find optimal parameter values
+[] Train ViT on all distored images
+[] Train ViT on idividuals
+[] Visualize Attention-Scores
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+## Acknowledgment
+My appreciation goes to
+- Marcus Barkowsky, my dedicated professor and mentor.
+- Pavel Majer, whose preliminary work made individual datasets available.
+- lucidrains, for their implementation of the Vision Transformer for small datasets.
