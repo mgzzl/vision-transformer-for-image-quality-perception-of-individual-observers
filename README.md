@@ -7,9 +7,9 @@ This project presents individual image quality assessment using Vision Transform
 Images
 
 ## Requirements
-- Linux and Windows are supported, but we recommend Linux for performance and compatibility reasons.
+- Linux and Windows are supported, but I recommend Linux for performance and compatibility reasons.
 - NVIDIA GPU. I have done all testing and development using RTX 3090 GPU.
-- 64-bit Python 3.11 and PyTorch 2.0 (or later). See [pytorch.org](https://pytorch.org) for PyTorch install instructions.
+- 64-bit Python 3.10.9 and PyTorch 2.0.1 (or later). See [pytorch.org](https://pytorch.org) for PyTorch install instructions.
 - CUDA toolkit 11.8 or later.
 
 ## Installation
@@ -26,7 +26,7 @@ jupyter notebook
 ```
 
 ## Support
-For comments, queries and help I can be reached at the following email adress: max.geissler@stud.th-deg.de
+For comments, questions and help I can be reached at the following email adress: max.geissler@stud.th-deg.de
 
 ## ToDo's
 - [ ] Integrate pretrained ViT-Model
