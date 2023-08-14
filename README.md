@@ -8,6 +8,7 @@ Images
 
 ## Requirements
 - Linux and Windows are supported, but I recommend Linux for performance and compatibility reasons.
+- [Anaconda](https://www.anaconda.com/download) or Miniconda. To manage environment dependencies.
 - NVIDIA GPU. I have done all testing and development using RTX 3090 GPU.
 - 64-bit Python 3.11.4 and PyTorch 2.0.1 (or later). See [pytorch.org](https://pytorch.org) for PyTorch install instructions.
 - CUDA toolkit 11.8 or later.
