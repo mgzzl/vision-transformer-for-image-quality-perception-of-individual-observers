@@ -10,7 +10,7 @@ import datetime
 import matplotlib.pyplot as plt
 from sklearn.metrics import accuracy_score
 
-from imageset_handler import ImageQualityDataset
+from utils.imageset_handler import ImageQualityDataset
 
 
 def train_vit_model(csv_file, dataset_root, results_path, num_epochs=10, batch_size=16, learning_rate=1e-4/2, pretrained_model_path=None, vis=False):    # Define the ViT model architecture
