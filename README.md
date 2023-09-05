@@ -1,7 +1,7 @@
 # Vision Transformer For Image Quality Perception Of Individual Observers
 
 ### Description
-This project presents individual image quality assessment using Vision Transformer (ViT). Building on previous research on predicting quality ratings of compressed images using CNN models, this work aims to develop a model for human perception of image quality using ViT. The model presented in the paper "Vision Transformer for Small-Size Datasets" has been incorporated into this work for finer quality assessment. In addition, visualization of the Vision Transformer's attention mechanism will provide better insight into the human visual system.
+This project presents individual image quality assessment using Vision Transformer (ViT). Building on previous research on predicting quality ratings of compressed images using CNN models, this work aims to develop a model for human perception of image quality using ViT. The model presented in the paper "Vision Transformer for Small-Size Datasets" has been integrated into this work for performance improvments on small-size datasets. In addition, visualization of the Vision Transformer's attention mechanism could provide better insight into the human visual system.
 
 ## Visuals
 Images
