@@ -5,3 +5,4 @@ numpy
 einops
 torch
 torchvision
+seaborn
