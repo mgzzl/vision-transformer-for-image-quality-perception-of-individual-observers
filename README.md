@@ -1,7 +1,7 @@
-# Vision Transformer For Image Quality Perception Of Individual Observers
+# Vision Transformer For Image Quality Prediction Of Individual Observers
 
 ### Description
-This project presents individual image quality assessment using Vision Transformer (ViT). Building on previous research on predicting quality ratings of compressed images using CNN models, this work aims to develop a model for human perception of image quality using ViT. The model presented in the paper "Vision Transformer for Small-Size Datasets" has been integrated into this work for performance improvments on small-size datasets. In addition, visualization of the Vision Transformer's attention mechanism could provide better insight into the human visual system.
+This project presents individual image quality assessment using Vision Transformer (ViT). Building on previous research on predicting quality ratings of compressed images with CNN models, this work aims to develop a model for predicting image quality from individual observers using ViT. The model presented in the paper "[Vision Transformer for Small-Size Datasets](https://arxiv.org/abs/2112.13492)" has been integrated into this work for performance improvments on small-size datasets. In addition, visualization of the Vision Transformer's attention mechanism could provide better insight into the human visual system.
 
 ## Visuals
 Images
@@ -17,8 +17,7 @@ Images
 ```
 git clone https://mygit.th-deg.de/mg06201/vision-transformer-for-image-quality-perception-of-individual-observers.git
 cd vision-transformer-for-image-quality-perception-of-individual-observers
-conda env create -f environment.yml
-conda activate vit_iqa
+pip install -r requirements.txt
 ```
 
 ## Usage
@@ -30,18 +29,18 @@ jupyter notebook
 For comments, questions and help I can be reached at the following email adress: max.geissler@stud.th-deg.de
 
 ## ToDo's
-- [ ] Integrate pretrained ViT-Model
-- [ ] Find optimal parameter values
-- [ ] Train ViT on all distored images
+- [ ] Integrate pretrained ViT-Model (Probably not possible due to custom implementation / architecture)
 - [ ] Train ViT on idividuals
-- [ ] Visualize Attention-Scores
 - [ ] Compare Attention-Scores of ViT with GRADCAM of JPEGResNet50
 ***
+- [x] Train ViT on all distored images
 - [x] Write Training Script
 - [x] Convert Matlab rating playlists to csv
 - [x] Visualize Confusion-Map
 - [x] Visualize dataset distribution
 - [x] Visualize training results
+- [x] Visualize Attention-Scores
+
 
 ## Acknowledgment
 My appreciation goes to
