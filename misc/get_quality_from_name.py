@@ -14,8 +14,8 @@ def get_quality_level_from_name(image_name):
         print(f"No Quality-Level found for {image_name}")
 
 
-image_folder_path = '/home/maxgan/WORKSPACE/UNI/BA/TIQ/assets/Test/TestImg'
-csv_file_path = '/home/maxgan/WORKSPACE/UNI/BA/TIQ/assets/Test/AccTestCsv/objectiveAccTest.csv'
+image_folder_path = '../assets/DatasetSubjective/Persons/Person_1_shinyx/imgs'
+csv_file_path = '../assets/DatasetSubjective/Persons/Person_1_shinyx/objective.csv'
 
 # Get a list of image files in the directory
 image_files = [file for file in os.listdir(image_folder_path)]
