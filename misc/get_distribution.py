@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import os
 
 # Directory containing the CSV files
-csv_directory = "assets/Test/AccTestCsv"
+csv_directory = "assets/Test"
 
 # Get a list of all CSV files in the directory
 csv_files = [file for file in os.listdir(csv_directory) if file.endswith(".csv")]
@@ -33,22 +33,25 @@ def process_csv(csv_file):
 
     # Calculate total number of images
     total_images = class_counts.sum()
+    # Extract the digit from the CSV file name
+    digit = ''.join(filter(str.isdigit, csv_file))
 
     # Create a bar chart
     plt.figure(figsize=(10, 6))
     class_counts.plot(kind="bar", color='skyblue')
-    plt.title(f"Image Rating Distribution for {csv_file.split('.')[0]}")
+    # plt.title(f"Image Rating Distribution of DS{digit} according to {csv_file.split('.')[0]}")
+    plt.title(f"Image Rating Distribution of DSX according to {csv_file.split('.')[0]}")
     plt.xlabel("Rating")
     plt.ylabel("Number of Images")
     plt.xticks(rotation=45)
     plt.tight_layout()
 
     # Save the bar chart as an image
-    output_image_path = os.path.join(csv_directory, f"rating_distribution_{csv_file.replace('.csv', '.png')}")
+    output_image_path = os.path.join(csv_directory, f"rating_distribution_DSX_{csv_file.replace('.csv', '.png')}")
     plt.savefig(output_image_path)
 
     # Display the table
-    print(f"Rating Distribution Table for {csv_file.split('.')[0]}")
+    print(f"Rating Distribution Table of DS{digit} for {csv_file.split('.')[0]}")
     print(class_counts)
 
     # Close the plot
