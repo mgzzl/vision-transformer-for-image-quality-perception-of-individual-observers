@@ -17,7 +17,7 @@ def save_sorttable_to_csv(mat_file_path, output_directory):
 
     with open(csv_file_path, 'w', newline='') as csvfile:
         writer = csv.writer(csvfile)
-        # writer.writerow(["Image Name", "Vote", "Duration", "Timestamp"])
+        writer.writerow(["Image Name", "Vote", "Duration", "Timestamp"])
         for i in range(len(sort_table)):
             image_name = mat['imgList'][0][i]
             vote = mat['voteList'][0][i]
@@ -37,7 +37,7 @@ def process_directory(directory, output_directory):
 
 
 # Provide the directory path containing the .mat files
-directory = '/home/maxgan/WORKSPACE/UNI/BA/TIQ/Assets/DatasetSubjective/scores/Persons/allMatlab'
-output_directory = '/home/maxgan/WORKSPACE/UNI/BA/TIQ/Assets/DatasetSubjective/scores/Persons/allMatlab'
+directory = '/home/maxgan/WORKSPACE/UNI/BA_Pavel/matlab/results_csv/Obs5'
+output_directory = '/home/maxgan/WORKSPACE/UNI/BA_Pavel/matlab/results_csv/Obs5'
 
 process_directory(directory, output_directory)
