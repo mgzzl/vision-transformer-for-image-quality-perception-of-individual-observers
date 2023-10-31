@@ -2,23 +2,29 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import os
 
-# Directory containing the CSV files
-csv_directory = "assets/Test"
+def generate_bar_chart_from_csv(csv_directory, csv_file, rating_labels):
+    """
+    Process a single CSV file, generate a bar chart, and print a rating distribution table.
 
-# Get a list of all CSV files in the directory
-csv_files = [file for file in os.listdir(csv_directory) if file.endswith(".csv")]
+    This function reads a CSV file, maps numerical ratings to their corresponding labels,
+    generates a bar chart showing the distribution of ratings, and prints a rating
+    distribution table. It also saves the bar chart as an image.
 
-# Define rating labels
-rating_labels = {
-    1: "Bad",
-    2: "Insufficient",
-    3: "Fair",
-    4: "Good",
-    5: "Excellent"
-}
+    Parameters:
+    csv_directory (str): The directory path containing the CSV files.
+    csv_file (str): The name of the CSV file to process.
+    rating_labels (dict): A dictionary mapping numerical ratings to their labels.
 
-# Function to process a single CSV file
-def process_csv(csv_file):
+    Output:
+    -------
+    - The function generates a bar chart showing the rating distribution and saves it as an image.
+    - It also prints a rating distribution table.
+
+    Note:
+    - The function assumes that the CSV file contains a "Vote" column with numerical ratings.
+    - The generated bar chart is saved in the same directory as the CSV file.
+    """
+
     # Read the CSV file
     data = pd.read_csv(os.path.join(csv_directory, csv_file), header=0)
     
@@ -31,15 +37,9 @@ def process_csv(csv_file):
     # Reindex the class_counts Series to match the desired order
     class_counts = class_counts.reindex(rating_labels.values())
 
-    # Calculate total number of images
-    total_images = class_counts.sum()
-    # Extract the digit from the CSV file name
-    digit = ''.join(filter(str.isdigit, csv_file))
-
     # Create a bar chart
     plt.figure(figsize=(10, 6))
     class_counts.plot(kind="bar", color='skyblue')
-    # plt.title(f"Image Rating Distribution of DS{digit} according to {csv_file.split('.')[0]}")
     plt.title(f"Image Rating Distribution of DSX according to {csv_file.split('.')[0]}")
     plt.xlabel("Rating")
     plt.ylabel("Number of Images")
@@ -51,13 +51,25 @@ def process_csv(csv_file):
     plt.savefig(output_image_path)
 
     # Display the table
-    print(f"Rating Distribution Table of DS{digit} for {csv_file.split('.')[0]}")
+    print(f"Rating Distribution Table of DSX for {csv_file.split('.')[0]}")
     print(class_counts)
 
     # Close the plot
     plt.close()
 
-# Process each CSV file in the directory
-for csv_file in csv_files:
-    process_csv(csv_file)
+def main():
+    # Directory containing the CSV files
+    csv_directory = "assets/Test"
 
+    # Get a list of all CSV files in the directory
+    csv_files = [file for file in os.listdir(csv_directory) if file.endswith(".csv")]
+
+    # Define rating labels
+    rating_labels = {1: "Bad", 2: "Insufficient", 3: "Fair", 4: "Good", 5: "Excellent"}
+
+    # Process each CSV file in the directory
+    for csv_file in csv_files:
+        generate_bar_chart_from_csv(csv_directory, csv_file, rating_labels)
+
+if __name__ == "__main__":
+    main()
