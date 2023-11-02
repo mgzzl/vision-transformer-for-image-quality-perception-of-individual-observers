@@ -1,19 +1,7 @@
-# Image Checker Module
-# ---------------------
-# This module is responsible for checking the existence of images listed in a CSV file
-# within a specified directory. It provides functions to read the CSV file and perform
-# the image existence check.
-
 # Import necessary modules
 import csv
 import os
 
-
-# Function: check_image_existence
-# ------------------------------
-# This function reads the CSV file containing a list of image names and checks
-# their existence within the specified image directory. It returns a summary of
-# how many images were found and how many were not found.
 def check_image_existence(csv_file_path, image_folder_path):
     """
     Reads a CSV file and checks the existence of images in a directory.
