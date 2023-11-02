@@ -10,7 +10,7 @@ class ImageQualityDataset(Dataset):
         Custom dataset class for image quality prediction.
 
         This class reads a CSV file with image names and votes (quality levels), and loads images
-        from the specified directory. It shuffles and selects images to balance the dataset.
+        from the specified directory. It shuffles the images in the dataset.
 
         Parameters:
         csv_file (str): Path to the CSV file containing image information.
@@ -25,7 +25,7 @@ class ImageQualityDataset(Dataset):
         """
         self.csv_file = csv_file
         self.transform = transform
-
+        self.class_files = []
         df = pd.read_csv(csv_file)
 
         # Determine column names based on the header presence
@@ -44,17 +44,12 @@ class ImageQualityDataset(Dataset):
             quality_level = int(row[quality_column]) - 1
             self.image_files.append((image_path, quality_level))
             class_counts[quality_level] += 1
+        
+        for i in range(len(class_counts)):
+            print(f"Number of images in class {i}: {class_counts[i]}")
 
-        selected_files = []
-        for i in range(5):
-            class_files = [(img, label) for img, label in self.image_files if label == i]
-            random.shuffle(class_files)
-            selected_files.extend(class_files)
-
-        random.shuffle(selected_files)
-        self.image_files = selected_files
-
-        print(f"Number of images in the dataset: {len(selected_files)}")
+        random.shuffle(self.image_files)
+        print(f"\nNumber of images in the dataset: {len(self.image_files)}")
 
     def __len__(self):
         return len(self.image_files)
