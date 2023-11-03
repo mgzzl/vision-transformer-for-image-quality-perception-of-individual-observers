@@ -60,4 +60,4 @@ class ImageQualityDataset(Dataset):
         image = Image.open(image_path).convert('RGB')
         if self.transform:
             image = self.transform(image)
-        return image, label
+        return image,image_path,label
