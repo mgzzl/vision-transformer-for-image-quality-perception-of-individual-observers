@@ -20,52 +20,6 @@ def find_pth_files(directory_path):
                 pth_files.append(os.path.join(root, file))
     return pth_files
 
-def resize_and_normalize_attention_maps(attention_maps, image_patch_size, image_size):
-    """
-    Resize and normalize attention maps to match the original image patch dimensions.
-
-    This function takes a list of attention maps and resizes them to match the specified
-    image patch dimensions. It also normalizes the attention maps to have values in the
-    range [0, 1].
-
-    Parameters:
-    attention_maps (list of numpy.ndarray): A list of attention maps to resize and normalize.
-    image_patch_size (int): The size of image patches.
-    image_size (int): The size of the original image.
-
-    Returns:
-    list of numpy.ndarray: A list of resized and normalized attention maps.
-
-    Output:
-    - The function returns a list of resized and normalized attention maps.
-
-    Note:
-    - The input attention maps should be a list of numpy arrays.
-    """
-
-    resized_and_normalized_attention_maps = []
-    for attention_map in attention_maps:
-        # Resize the attention map to match image patch dimensions
-        resized_attention_map = np.zeros((image_size, image_size))
-        for i in range(attention_map.shape[0]):
-            for j in range(attention_map.shape[1]):
-                x_start = i * image_patch_size
-                x_end = (i + 1) * image_patch_size
-                y_start = j * image_patch_size
-                y_end = (j + 1) * image_patch_size
-
-                # Resize the attention map and add it to the corresponding region
-                resized_attention_map[x_start:x_end, y_start:y_end] = attention_map[i, j]
-                
-        # Normalize the attention map to range [0, 1]
-        min_value = np.min(resized_attention_map)
-        max_value = np.max(resized_attention_map)
-        normalized_attention_map = (resized_attention_map - min_value) / (max_value - min_value)
-
-        resized_and_normalized_attention_maps.append(normalized_attention_map)
-
-    return resized_and_normalized_attention_maps
-
 def calculate_true_distributions(labels, sigma, num_classes, device):
     """
     Calculate true distributions based on labels, sigma, and the number of classes.
@@ -104,3 +58,40 @@ def calculate_true_distributions(labels, sigma, num_classes, device):
         true_distributions[j] = true_distribution
 
     return true_distributions
+
+def calculate_sigma_from_distributions(true_distributions, num_classes, device):
+    """
+    Calculate sigma from true distributions, the number of classes, and the device.
+
+    This function calculates the sigma value used to generate the true distributions
+    based on a set of given true distributions.
+
+    Parameters:
+    true_distributions (torch.Tensor): A tensor of true distributions.
+    num_classes (int): The number of classes.
+    device (str): The device (CPU or GPU) for tensor computations.
+
+    Returns:
+    float: The calculated sigma value.
+
+    Note:
+    - The input true_distributions should be a 2D torch tensor.
+    """
+
+    num_samples = true_distributions.size(0)
+    sigma_values = torch.empty(num_samples, dtype=torch.float32, device=device)
+
+    for i in range(num_samples):
+        # Calculate the mean of the distribution
+        mean = torch.sum(torch.arange(num_classes, dtype=torch.float32, device=device) * true_distributions[i])
+
+        # Calculate the squared distance from the mean
+        distance_squared = torch.sum(((torch.arange(num_classes, dtype=torch.float32, device=device) - mean)**2) * true_distributions[i])
+
+        # Calculate sigma using the standard deviation formula
+        sigma = torch.sqrt(distance_squared)
+
+        sigma_values[i] = sigma
+
+    # Return the mean sigma value
+    return sigma_values
