@@ -59,7 +59,7 @@ def calculate_true_distributions(labels, sigma, num_classes, device):
 
     return true_distributions
 
-def calculate_sigma_from_distributions(true_distributions, num_classes, device):
+def calculate_sigma_from_distributions(probabilities, num_classes, device):
     """
     Calculate sigma from true distributions, the number of classes, and the device.
 
@@ -67,7 +67,7 @@ def calculate_sigma_from_distributions(true_distributions, num_classes, device):
     based on a set of given true distributions.
 
     Parameters:
-    true_distributions (torch.Tensor): A tensor of true distributions.
+    probabilities (torch.Tensor): A tensor of probabilities.
     num_classes (int): The number of classes.
     device (str): The device (CPU or GPU) for tensor computations.
 
@@ -75,23 +75,37 @@ def calculate_sigma_from_distributions(true_distributions, num_classes, device):
     float: The calculated sigma value.
 
     Note:
-    - The input true_distributions should be a 2D torch tensor.
+    - The input probabilities should be a 2D torch tensor.
     """
 
-    num_samples = true_distributions.size(0)
-    sigma_values = torch.empty(num_samples, dtype=torch.float32, device=device)
+    # Calculate the mean of the probabilities
+    mean_probabilities = torch.mean(probabilities, dim=1)
 
-    for i in range(num_samples):
-        # Calculate the mean of the distribution
-        mean = torch.sum(torch.arange(num_classes, dtype=torch.float32, device=device) * true_distributions[i])
+    # Calculate the squared difference between each probability and the mean
+    squared_diff = (probabilities - mean_probabilities.unsqueeze(1))**2
 
-        # Calculate the squared distance from the mean
-        distance_squared = torch.sum(((torch.arange(num_classes, dtype=torch.float32, device=device) - mean)**2) * true_distributions[i])
+    # Calculate the mean of the squared differences
+    mean_squared_diff = torch.mean(squared_diff, dim=1)
 
-        # Calculate sigma using the standard deviation formula
-        sigma = torch.sqrt(distance_squared)
+    # Take the square root to get the standard deviation
+    std_dev = torch.sqrt(mean_squared_diff)
 
-        sigma_values[i] = sigma
+    # print("Standard Deviation:", std_dev)
 
-    # Return the mean sigma value
-    return sigma_values
+
+    # num_samples = probabilities.size(0)
+    # sigma_values = torch.empty(num_samples, dtype=torch.float32, device=device)
+
+    # for i in range(num_samples):
+    #     # Calculate the mean of the distribution
+    #     mean = torch.sum(torch.arange(num_classes, dtype=torch.float32, device=device) * probabilities[i])
+
+    #     # Calculate the squared distance from the mean
+    #     distance_squared = torch.sum(((torch.arange(num_classes, dtype=torch.float32, device=device) - mean)**2) * probabilities[i])
+
+    #     # Calculate sigma using the standard deviation formula
+    #     sigma = torch.sqrt(distance_squared)
+
+    #     sigma_values[i] = sigma
+
+    return std_dev.cpu().numpy()
