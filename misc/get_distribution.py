@@ -36,22 +36,23 @@ def generate_bar_chart_from_csv(csv_directory, csv_file, rating_labels):
 
     # Reindex the class_counts Series to match the desired order
     class_counts = class_counts.reindex(rating_labels.values())
-
+    digit = ''.join(filter(str.isdigit, csv_file.split('.')[0]))
     # Create a bar chart
     plt.figure(figsize=(10, 6))
     class_counts.plot(kind="bar", color='skyblue')
-    plt.title(f"Image Rating Distribution of DSX according to {csv_file.split('.')[0]}")
+    plt.title(f"Image Rating Distribution of DS{digit} according to {csv_file.split('.')[0]}")
     plt.xlabel("Rating")
     plt.ylabel("Number of Images")
+    # plt.ylim(0,650)
     plt.xticks(rotation=45)
     plt.tight_layout()
 
     # Save the bar chart as an image
-    output_image_path = os.path.join(csv_directory, f"rating_distribution_DSX_{csv_file.replace('.csv', '.png')}")
+    output_image_path = os.path.join(csv_directory, f"rating_distribution_DS{digit}_{csv_file.replace('.csv', '.png')}")
     plt.savefig(output_image_path)
 
     # Display the table
-    print(f"Rating Distribution Table of DSX for {csv_file.split('.')[0]}")
+    print(f"Rating Distribution Table of DS{digit} for {csv_file.split('.')[0]}")
     print(class_counts)
 
     # Close the plot
@@ -59,7 +60,7 @@ def generate_bar_chart_from_csv(csv_directory, csv_file, rating_labels):
 
 def main():
     # Directory containing the CSV files
-    csv_directory = "assets/Test"
+    csv_directory = "/home/maxgan/WORKSPACE/UNI/BA/vision-transformer-for-image-quality-perception-of-individual-observers/assets/Dataset"
 
     # Get a list of all CSV files in the directory
     csv_files = [file for file in os.listdir(csv_directory) if file.endswith(".csv")]

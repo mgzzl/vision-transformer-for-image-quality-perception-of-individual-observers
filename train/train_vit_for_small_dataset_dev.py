@@ -4,13 +4,13 @@ import torch.nn as nn
 import torch.optim as optim
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
-from vit_pytorch.vit_for_small_dataset import ViT
+from model.vit_for_small_dataset import ViT
 import os
 import datetime
 import matplotlib.pyplot as plt
 from sklearn.metrics import accuracy_score
 
-from utils.imageset_handler import ImageQualityDataset
+from utils.imageQualityDataset import ImageQualityDataset
 
 
 def train_vit_model(csv_file, dataset_root, results_path, num_epochs=10, batch_size=16, learning_rate=1e-4/2, pretrained_model_path=None, vis=False):    # Define the ViT model architecture
