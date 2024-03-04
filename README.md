@@ -29,11 +29,11 @@ jupyter notebook
 For comments, questions and help I can be reached at the following email adress: max.geissler@stud.th-deg.de
 
 ## ToDo's
-- [-] Integrate pretrained ViT-Model (Probably not possible due to custom implementation / architecture)
+- [ ] Integrate pretrained ViT-Model (Probably not possible due to custom implementation / architecture)
 - [ ] Compare Attention-Scores of ViT with GRADCAM of JPEGResNet50
-- [x] Train ViT on idividuals (iterativ)
 
 ***
+- [x] Train ViT on idividuals (iterativ)
 - [x] Train ViT on idividuals
 - [x] Train ViT on all distored images
 - [x] Write Training Script
@@ -47,5 +47,6 @@ For comments, questions and help I can be reached at the following email adress:
 ## Acknowledgment
 My appreciation goes to
 - Marcus Barkowsky, my dedicated professor and mentor.
+- Lohic Fotio Tiotsop, for his tips on visualising the attentionmaps.
 - Pavel Majer, whose preliminary work made individual datasets available.
 - lucidrains, for their implementation of the Vision Transformer for small datasets.
