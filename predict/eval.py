@@ -1,3 +1,4 @@
+import csv
 import torch
 from PIL import Image
 import os
@@ -6,19 +7,15 @@ import sys
 from sklearn.metrics import mean_squared_error, accuracy_score, classification_report, confusion_matrix
 import numpy as np
 sys.path.append('/home/maxgan/WORKSPACE/UNI/BA/vision-transformer-for-image-quality-perception-of-individual-observers')
-from model.recorder import Recorder
-import seaborn as sns
-import matplotlib.pyplot as plt
 from torchvision import transforms
 from torch.utils.data import DataLoader
 from utils.imageQualityDataset import ImageQualityDataset
-from model.recorder import Recorder
 from scipy.stats import entropy
 from misc.helpers import create_vit_model, calculate_label_distributions, trans_norm2tensor
 
 def evaluate_model(weight_file, test_loader):
     """
-    Evaluate a model with the specified weight file.
+    Evaluate AIO with the specified weight file.
 
     Parameters:
     weight_file (str): The path to the weight file.
@@ -45,7 +42,6 @@ def evaluate_model(weight_file, test_loader):
         for i, (images, image_paths, labels) in enumerate(test_loader, 0):
             # images = images.to(device)
             # labels = labels.to(device)
-            print(f"Example Prediction of Batch: {i}")
             outputs = model(images)
             true_labels.extend(labels)
 
@@ -104,15 +100,20 @@ def evaluate_model(weight_file, test_loader):
 
     # Calculate Accuracy
     accuracy = accuracy_score(true_labels, test_preds)
+
+    # Get the unique predicted classes
+    unique_preds = set(test_preds)
     target_names  = ["bad", "poor", "fair", "good", "excellent"]
 
+    # Extract only the target names that match the unique predicted classes
+    target_names_used = [target_names[i] for i in unique_preds]
     # Generate classification report
-    class_report = classification_report(true_labels, test_preds, target_names=target_names)
+    class_report = classification_report(true_labels, test_preds, target_names=target_names_used)
 
     # Generate confusion matrix
-    confusion = confusion_matrix(true_labels, test_preds)
+    # confusion = confusion_matrix(true_labels, test_preds, labels=target_names_used)
 
-    print('#'*50)
+    print('#'*100)
     print('model summary:')
     # Print summary
     results = {
@@ -122,29 +123,56 @@ def evaluate_model(weight_file, test_loader):
         "MSE weighted": mse_weighted,
         "Mean Entropy": mean_entropy,
         "Mean KL Divergence": mean_kl_div, 
-        "Classification Report": class_report
+        "Classification Report": "\n"+class_report
     }
     for key, value in results.items():
         print(f"{key}: {value}")
-    print('#'*50)
+    print('#'*100 + "\n")
 
     return results
 
+def save_results_to_csv(results, csv_file_path):
+    with open(csv_file_path, 'w', newline='') as csvfile:
+        fieldnames = results[0].keys()
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+
+        # Write header
+        writer.writeheader()
+
+        # Write rows
+        for result in results:
+            writer.writerow(result)
+
+
 if __name__ == "__main__":
+    """
+    Evaulate all AIOs based on their real Observer (Obs) and save it in a csv file.
+    
+    """
+
+
     # Define parameters
     image_size = 256
     patch_size = 16
     num_classes = 5
     depth = 6
 
+    batch_size = 128
+
     # Define model and device
     model = create_vit_model(image_size=image_size, patch_size=patch_size, num_classes=num_classes, depth=depth)
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     # Define dataset parameters
-    csv_file = 'assets/Test/Obs1.csv'
+    csv_dir = 'assets/Test'
+    csv_paths = [os.path.join(csv_dir, f'Obs{i}.csv') for i in range(0, 6)]
+
+    # List of different weight files
+    weights_dir = 'results/weights/Cross-Entropy_3_Iter_var_0.4/FINAL'
+    weight_paths = [os.path.join(weights_dir, f'AIO{i}.pth') for i in range(0, 6)]
+
+    # Testdataset
     dataset_root = 'assets/Test/DSX'
-    batch_size = 128
 
     # Define the normalization parameters (mean and std)
     mean = [0.485, 0.456, 0.406]
@@ -159,16 +187,17 @@ if __name__ == "__main__":
         transforms.Normalize(mean=mean, std=std)
     ])
 
-    # Initialize the test dataset and data loader
-    test_dataset = ImageQualityDataset(csv_file, dataset_root, transform=transform)
-    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
-
-    # List of different weight files
-    weight_files = ['results/weights/Cross-Entropy_3_Iter_var_0.4/FINAL/AIO1.pth']  # Add other weight files here if needed
-
     results = []
-    for weight_file in weight_files:
+    for weight_file,csv_file in zip(weight_paths,csv_paths):
+        print(f"Loading Testdataset due to {os.path.basename(csv_file)}...")
+        # Initialize the test dataset and data loader
+        test_dataset = ImageQualityDataset(csv_file, dataset_root, transform=transform)
+        test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
         result = evaluate_model(weight_file, test_loader)
-        for key, value in result.items():
-            print(f"{key}: {value}")
         results.append(result)
+
+    # Save results to a CSV file
+    output_csv_file = 'evaluation_results.csv'
+    output_csv_path = os.path.join(weights_dir, output_csv_file)
+    save_results_to_csv(results, output_csv_path)
+    print(f"Results saved to '{output_csv_path}'")
