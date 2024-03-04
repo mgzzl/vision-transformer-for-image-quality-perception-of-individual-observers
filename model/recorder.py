@@ -1,3 +1,11 @@
+# _________________________________________________________________________
+# 
+# Vision Transformer for Small-Size Datasets Recorder to record attention weights
+# _________________________________________________________________________
+# 
+# AUTHOR : lucidrains (Phil Wang)
+# ________________________________________________________________________
+
 from functools import wraps
 import torch
 from torch import nn

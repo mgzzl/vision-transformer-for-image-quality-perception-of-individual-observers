@@ -49,7 +49,7 @@ class ImageQualityDataset(Dataset):
             print(f"Number of images in class {i}: {class_counts[i]}")
 
         random.shuffle(self.image_files)
-        print(f"\nNumber of images in the dataset: {len(self.image_files)}")
+        print(f"\nNumber of images in the dataset: {len(self.image_files)}\n\n")
 
     def __len__(self):
         return len(self.image_files)
@@ -61,3 +61,19 @@ class ImageQualityDataset(Dataset):
         if self.transform:
             image = self.transform(image)
         return image,image_path,label
+    
+    def get_label_by_image_path(self, image_path):
+        """
+        Get the label of an image based on its image_path.
+
+        Parameters:
+        image_path (str): Path to the image.
+
+        Returns:
+        int: Label corresponding to the image_path.
+        """
+        for path, label in self.image_files:
+            if path == image_path:
+                return label
+        # Handle the case where the image_path is not found
+        raise ValueError(f"Image path '{image_path}' not found in the dataset.")

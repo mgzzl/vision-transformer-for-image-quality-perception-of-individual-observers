@@ -1,56 +1,73 @@
 import torch
-import torch.nn as nn
-import torchvision.transforms as transforms
 from PIL import Image
-from vit_pytorch.vit_for_small_dataset import ViT
-import numpy as np
-import math
+import os
+import torch.nn as nn
+import sys
+sys.path.append('/home/maxgan/WORKSPACE/UNI/BA/vision-transformer-for-image-quality-perception-of-individual-observers')
+from model.recorder import Recorder
+from misc.helpers import create_vit_model, trans_norm2tensor
 
-# Define the ViT model architecture
-v = ViT(
-    image_size=256,
-    patch_size=16,
-    num_classes=5,
-    dim=1024,
-    depth=6,
-    heads=16,
-    mlp_dim=2048,
-    emb_dropout=0.1
-)
+patch_size = 16
 
-# Load the trained model weights
-model_path = '/home/maxgan/WORKSPACE/UNI/BA/TIQ/results/vit_model_20230628_183411_nEpochs_10_batchsize_16_objective_subjective.pth'
-v.load_state_dict(torch.load(model_path))
 
-# Define the image transformation
-transform = transforms.Compose([
-    transforms.Resize(256),
-    transforms.CenterCrop(256),  # Add center cropping
-    transforms.ToTensor(),
-    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])  # Same normalization as during training
-])
+def predict_images_in_folder(folder_path, model):
+    """
+    Process all images in a folder and return predictions and attention maps.
 
-# Load and preprocess the image
-image_path = '/home/maxgan/WORKSPACE/UNI/BA/TIQ/Assets/Dataset/Persons/Person_1/Bad/12ILSVRC2013_train_00000419.JPEG_I1_Q6.jpeg'  # Replace with the path to your image
-image = Image.open(image_path).convert('RGB')
-image = transform(image).unsqueeze(0)  # Add batch dimension
+    Parameters:
+    folder_path (str): The path to the folder containing the images.
+    model (torch.nn.Module): The Vision Transformer model.
 
-# Make the prediction
-with torch.no_grad():
-    v.eval()
-    prediction = v(image)
+    Returns:
+    -------
+    predictions (list): List of predictions for each image.
+    attentions (list): List of attention maps for each image.
+    """
+    predictions = []
+    attentions = []
+    
+    # Get a list of all image files in the folder
+    image_files = [file for file in os.listdir(folder_path) if file.endswith(('.jpg', '.jpeg'))]
 
-# Apply softmax to obtain probabilities
-probabilities = nn.functional.softmax(prediction, dim=1)
-# Compute predicted MOS
-quality_levels = np.array([1, 2, 3, 4, 5])
-MOS_res = torch.matmul(probabilities, torch.from_numpy(quality_levels).float().to(prediction.device))
-# Convert the prediction to a quality level
-quality_levels_str = ['Bad', 'Insufficient', 'Fair', 'Good', 'Excellent']
-predicted_quality_level = quality_levels_str[int(MOS_res.item())]
-print(f"Predicted: {image_path}")
-# Print the results
-print("Predicted MOS:", MOS_res.item())
-print(f"Probabilities: {[probability.item() for probability in probabilities[0]]}")
+    # Iterate over each image file
+    for image_file in image_files:
+        # Load and preprocess the image
+        image_path = os.path.join(folder_path, image_file)
+        image_pil = Image.open(image_path).convert('RGB')
+        image = trans_norm2tensor(image_pil, 256)
+        img = image.to(device)
 
-print(f"Predicted image quality (mos): {predicted_quality_level}")
+        # Make the image divisible by the patch size
+        w, h = img.shape[1] - img.shape[1] % patch_size, img.shape[2] - img.shape[2] % patch_size
+        img = img[:, :w, :h].unsqueeze(0)
+
+        w_featmap = img.shape[-2] // patch_size
+        h_featmap = img.shape[-1] // patch_size
+        # Make the prediction
+        with torch.no_grad():
+            model.eval()
+            prediction, attention = model(img)
+            _, preds = torch.max(prediction, dim=1)
+            predictions.append(preds.cpu().numpy()[0]+1)
+            attentions.append(attention.cpu().numpy())
+
+    return predictions, attentions
+
+if __name__ == "__main__":
+    # Load the trained model weights
+    model_path = 'results/weights/Cross-Entropy_3_Iter_var_0.4/FINAL/AIO5.pth'
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+    model = create_vit_model(weights_path=model_path)
+    model = Recorder(model).to(device)
+    model = model.to(device)
+    # Directory containing the images
+    image_folder = "assets/work_imgs/fg_bg"
+
+    # Process images in the folder
+    predictions, attentions = predict_images_in_folder(image_folder, model)
+    
+    # Print the results
+    for i, (prediction, attention) in enumerate(zip(predictions, attentions)):
+        print(f"Prediction for image {i + 1}: {prediction}")
+        print(f"Attention map shape for image {i + 1}: {attention.shape}\n")

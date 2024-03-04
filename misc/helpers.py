@@ -7,6 +7,24 @@ from PIL import Image
 from model.vit_for_small_dataset import ViT
 
 def create_vit_model(image_size=256, patch_size=16, num_classes=5, dim=1024,  depth=6, heads=16, mlp_dim=2048, emb_dropout=0.1, weights_path=None):
+    """
+    Create a Vision Transformer (ViT) model.
+
+    Parameters:
+    image_size (int): Input image size. Defaults to 256.
+    patch_size (int): Patch size. Defaults to 16.
+    num_classes (int): Number of output classes. Defaults to 5.
+    dim (int): Dimension of the token embeddings. Defaults to 1024.
+    depth (int): Depth of the Transformer model. Defaults to 6.
+    heads (int): Number of attention heads. Defaults to 16.
+    mlp_dim (int): Dimension of the MLP layers. Defaults to 2048.
+    emb_dropout (float): Dropout rate applied to the token embeddings. Defaults to 0.1.
+    weights_path (str): Path to pretrained weights file. Defaults to None.
+
+    Returns:
+    model (torch.nn.Module): ViT model instance.
+    """
+    # Initialize ViT model with specified parameters
     model = ViT(
         image_size=image_size,
         patch_size=patch_size,
@@ -24,7 +42,38 @@ def create_vit_model(image_size=256, patch_size=16, num_classes=5, dim=1024,  de
 
     return model
 
-def find_pth_files(directory_path):
+def predict_image_class_probabilities(model, img, device):
+    """
+    Get class probabilities for an input image using the provided model.
+
+    This function takes an input image, preprocesses it, and passes it through the provided model
+    to obtain class probabilities using softmax activation. It returns the probabilities as a NumPy array.
+
+    Parameters:
+    model (torch.nn.Module): The pre-trained model.
+    img (torch.Tensor): The input image tensor.
+    device (torch.device): The device to run the model on (e.g., CPU or GPU).
+
+    Returns:
+    probabilities (numpy.ndarray): An array containing class probabilities for the input image.
+    """
+    # Add a batch dimension to the input image
+    img = img.unsqueeze(0).to(device)
+    # Move the model to the specified device
+    model.to(device)
+
+    # Set the model to evaluation mode and disable gradient computation
+    with torch.no_grad():
+        model.eval()
+        # Pass the input image through the model to get the output logits
+        output = model(img)
+
+    # Apply softmax activation to obtain class probabilities and convert to NumPy array
+    probabilities = torch.softmax(output, dim=1).cpu().numpy()[0]
+
+    return probabilities
+
+def find_model_weights(directory_path):
     """
     Find and return a list of full paths to .pth files in the specified directory.
 
@@ -41,7 +90,7 @@ def find_pth_files(directory_path):
                 pth_files.append(os.path.join(root, file))
     return pth_files
 
-def calculate_true_distributions(labels, device, sigma=0.7**2, num_classes=5):
+def calculate_label_distributions(labels, device, sigma=0.7**2, num_classes=5):
     """
     Calculate true distributions based on labels, sigma, and the number of classes.
 
@@ -80,48 +129,26 @@ def calculate_true_distributions(labels, device, sigma=0.7**2, num_classes=5):
 
     return true_distributions
 
-def calculate_sigma_from_distributions(probabilities, num_classes, device):
-    """
-    Calculate sigma from true distributions, the number of classes, and the device.
-
-    This function calculates the sigma value used to generate the true distributions
-    based on a set of given true distributions.
-
-    Parameters:
-    probabilities (torch.Tensor): A tensor of probabilities.
-    num_classes (int): The number of classes.
-    device (str): The device (CPU or GPU) for tensor computations.
-
-    Returns:
-    float: The calculated sigma value.
-
-    Note:
-    - The input probabilities should be a 2D torch tensor. batch_size, probability
-    """
-
-    # Calculate the mean of the probabilities
-    mean_probabilities = torch.mean(probabilities, dim=1)
-
-    # Calculate the squared difference between each probability and the mean
-    squared_diff = (probabilities - mean_probabilities.unsqueeze(1))**2
-
-    # Calculate the mean of the squared differences
-    mean_squared_diff = torch.mean(squared_diff, dim=1)
-
-    # Take the square root to get the standard deviation
-    std_dev = torch.sqrt(mean_squared_diff)
-
-    return std_dev.cpu().numpy()
-
 
 def trans_norm2tensor(img, img_size):
+    """
+    Transform and normalize the input image to a PyTorch tensor.
+
+    Parameters:
+    - img (PIL.Image): Input image.
+    - img_size (int): Desired size for the image.
+
+    Returns:
+    torch.Tensor: Transformed and normalized image tensor.
+    """
     # Convert grayscale to RGB if the image has only one channel
     if img.mode == 'L':
         img = img.convert('RGB')
 
     # Define the normalization parameters (mean and std)
-    mean = [0.485, 0.456, 0.406]
-    std = [0.229, 0.224, 0.225]
+    mean = torch.tensor([0.485, 0.456, 0.406])
+    std = torch.tensor([0.229, 0.224, 0.225])
+
     # Define the transformation including normalization
     transform = transforms.Compose([
         transforms.Resize(img_size),
@@ -130,53 +157,107 @@ def trans_norm2tensor(img, img_size):
         transforms.ToTensor(),
         transforms.Normalize(mean=mean, std=std)
     ])
+
     img = transform(img)
     return img
 
 def prev_img(img, img_size):
+    """
+    Process the image for previewing purposes.
+
+    This function applies transformations to resize and center crop the input image to a specified size.
+
+    Parameters:
+    img (PIL.Image): The input image.
+    img_size (int): The desired size of the output image.
+
+    Returns:
+    img (PIL.Image): The processed image.
+    """
     # Define the transformation
     transform = transforms.Compose([
-        transforms.Resize(img_size),
-        transforms.CenterCrop(img_size),
+        transforms.Resize(img_size),     # Resize the image
+        transforms.CenterCrop(img_size), # Center crop the image
     ])
+    # Apply the transformation to the image
     img = transform(img)
+
     return img
 
+
 def prev_img_gray(img, img_size):
-        transform = transforms.Compose([
-            transforms.Resize(img_size),
-            transforms.CenterCrop(img_size),
-        ])
-        img = transform(img)
-        img_bw = img.convert('L')
+    """
+    Process the image for previewing purposes with grayscale and contrast adjustment.
 
-        # BW with YCbCr
-        img_ycbcr = img_bw.convert('YCbCr')
-        y, cb, cr = img_ycbcr.split()
-        # Convert Y to NumPy arrays
-        y_array = np.array(y)
+    This function applies transformations to resize and center crop the input image to a specified size.
+    It then converts the image to grayscale and enhances the contrast by scaling the luminance values.
+    
+    Parameters:
+    img (PIL.Image): The input image.
+    img_size (int): The desired size of the output image.
 
-        # Perform the desired contrast adjustment on the Y component
-        y_array = np.clip(y_array * 2.0, 0, 255).astype(np.uint8)
+    Returns:
+    img_bw_contrast_rgb (PIL.Image): The processed image with enhanced contrast in RGB format.
+    """
+    # Define the transformation
+    transform = transforms.Compose([
+        transforms.Resize(img_size),     # Resize the image
+        transforms.CenterCrop(img_size), # Center crop the image
+    ])
+    # Apply the transformation to the input image
+    img = transform(img)
+    # Convert the image to grayscale
+    img_bw = img.convert('L')
 
-        # Merge the Y, Cb, Cr components back into an image
-        img_bw_contrast = Image.merge('YCbCr', (Image.fromarray(y_array), cb, cr))
+    # Convert grayscale image to YCbCr color space
+    img_ycbcr = img_bw.convert('YCbCr')
+    y, cb, cr = img_ycbcr.split()
+    # Convert Y channel to NumPy arrays
+    y_array = np.array(y)
 
-        # Convert back to RGB for display (if needed)
-        img_bw_contrast_rgb = img_bw_contrast.convert('RGB')
-        
-        return img_bw_contrast_rgb
+    # Perform contrast adjustment on the Y component
+    y_array = np.clip(y_array * 2.0, 0, 255).astype(np.uint8)
 
-def get_csv_files_from_directory(directory_path):
+    # Merge the adjusted Y, Cb, Cr components back into an image
+    img_bw_contrast = Image.merge('YCbCr', (Image.fromarray(y_array), cb, cr))
 
-    csv_files = []
+    # Convert the image back to RGB for display
+    img_bw_contrast_rgb = img_bw_contrast.convert('RGB')
+    
+    return img_bw_contrast_rgb
+
+def find_csv_files(directory_path):
+    """
+    Get a list of CSV files from the specified directory and its subdirectories.
+
+    Parameters:
+    directory_path (str): The path to the directory containing CSV files.
+
+    Returns:
+    csv_files (list): A list of paths to CSV files found in the directory and its subdirectories.
+    """
+    csv_files = []  # Initialize an empty list to store CSV file paths
+    # Traverse through the directory and its subdirectories
     for root, _, files in os.walk(directory_path):
+        # Iterate over each file in the current directory
         for file in files:
+            # Check if the file has a ".csv" extension
             if file.endswith(".csv"):
+                # If it does, append the full path of the CSV file to the list
                 csv_files.append(os.path.join(root, file))
     return csv_files
 
 def get_image_paths_from_csv(csv_file_path, num_files):
+    """
+    Get a list of image paths from a CSV file containing image filenames.
+
+    Parameters:
+    csv_file_path (str): The path to the CSV file.
+    num_files (int): The number of image paths to extract.
+
+    Returns:
+    image_paths (list): A list of paths to the image files extracted from the CSV.
+    """
     # Extract the directory path from the CSV file path
     directory_path = os.path.dirname(csv_file_path)
 
@@ -189,7 +270,8 @@ def get_image_paths_from_csv(csv_file_path, num_files):
         next(reader)  # Skip the header row
         for row in reader:
             image_filename = row[0]
-            global_avg = row[1]
+            global_avg = row[1]  # Assuming the global average is stored in the second column
+            # Print visualization information
             print(f"Visualizing {image_filename} with a global avg of {global_avg}")
             image_path = os.path.join(directory_path, image_filename)
             image_paths.append(image_path)
@@ -201,6 +283,20 @@ def get_image_paths_from_csv(csv_file_path, num_files):
     return image_paths
 
 def get_image_paths_from_dir(image_dir, num_files=None):
+    """
+    Get a list of image paths from the specified directory.
+
+    This function lists all files in the specified directory, filters out files with ".jpeg" extension,
+    and creates full paths for the images. It optionally limits the number of files returned if num_files
+    is specified.
+
+    Parameters:
+    image_dir (str): The path to the directory containing images.
+    num_files (int): The number of image paths to return. If None, return all image paths. Defaults to None.
+
+    Returns:
+    image_paths (list): A list of paths to the images in the directory.
+    """
     # Get a list of all files in the specified directory
     all_files = os.listdir(image_dir)
 

@@ -1,3 +1,11 @@
+# _________________________________________________________________________
+# 
+# Vision Transformer for Small-Size Datasets Architecture
+# _________________________________________________________________________
+# 
+# AUTHOR : lucidrains (Phil Wang)
+# ________________________________________________________________________
+
 from math import sqrt
 import torch
 import torch.nn.functional as F

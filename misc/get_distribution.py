@@ -40,15 +40,18 @@ def generate_bar_chart_from_csv(csv_directory, csv_file, rating_labels):
     # Create a bar chart
     plt.figure(figsize=(10, 6))
     class_counts.plot(kind="bar", color='skyblue')
-    plt.title(f"Image Rating Distribution of DS{digit} according to {csv_file.split('.')[0]}")
-    plt.xlabel("Rating")
-    plt.ylabel("Number of Images")
-    # plt.ylim(0,650)
-    plt.xticks(rotation=45)
+    # plt.title(f"Image Rating Distribution of DS{digit} according to {csv_file.split('.')[0]}",fontsize=15)
+    plt.title(f"Image Rating Distribution of DSX according to {csv_file.split('.')[0]}",fontsize=15)
+    plt.xlabel("Rating", fontsize=15)
+    plt.ylabel("Number of Images", fontsize=15, labelpad=10)
+    plt.ylim(0,165)
+    plt.xticks(rotation=45, fontsize=15)
+    plt.yticks(fontsize=15)
     plt.tight_layout()
 
     # Save the bar chart as an image
-    output_image_path = os.path.join(csv_directory, f"rating_distribution_DS{digit}_{csv_file.replace('.csv', '.png')}")
+    # output_image_path = os.path.join(csv_directory, f"rating_distribution_DS{digit}_{csv_file.replace('.csv', '.png')}")
+    output_image_path = os.path.join(csv_directory, f"rating_distribution_DSX_{csv_file.replace('.csv', '.png')}")
     plt.savefig(output_image_path)
 
     # Display the table
@@ -60,13 +63,13 @@ def generate_bar_chart_from_csv(csv_directory, csv_file, rating_labels):
 
 def main():
     # Directory containing the CSV files
-    csv_directory = "/home/maxgan/WORKSPACE/UNI/BA/vision-transformer-for-image-quality-perception-of-individual-observers/assets/Dataset"
+    csv_directory = "/home/maxgan/WORKSPACE/UNI/BA/vision-transformer-for-image-quality-perception-of-individual-observers/assets/Test"
 
     # Get a list of all CSV files in the directory
     csv_files = [file for file in os.listdir(csv_directory) if file.endswith(".csv")]
 
     # Define rating labels
-    rating_labels = {1: "Bad", 2: "Insufficient", 3: "Fair", 4: "Good", 5: "Excellent"}
+    rating_labels = {1: "Bad", 2: "poor", 3: "Fair", 4: "Good", 5: "Excellent"}
 
     # Process each CSV file in the directory
     for csv_file in csv_files:
