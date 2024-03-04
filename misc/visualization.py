@@ -25,7 +25,7 @@ def normalize_attention_maps(attentions):
 
 def get_attention_maps(model, img, patch_size, device):
     """
-    Get attention maps for a given image using a pre-trained model.
+    Get prediction and attention maps for a given image using a pre-trained AIO.
 
     Parameters:
     - model: Pre-trained AIO.
@@ -35,37 +35,40 @@ def get_attention_maps(model, img, patch_size, device):
 
     Returns:
     tuple: Tuple containing predicted labels and attention maps.
+
+    Note:
+    - Ensure that the input image (img) is transformed and normalized before passing it to this function.
+    - from helpers import trans_norm2tensor
     """
     model = Recorder(model).to(device)
     img = img.to(device)
-
-    # Make the image divisible by the patch size
-    w, h = img.shape[1] - img.shape[1] % patch_size, img.shape[2] - img.shape[2] % patch_size
-    img = img[:, :w, :h].unsqueeze(0)
+    img = img.unsqueeze(0)
 
     w_featmap = img.shape[-2] // patch_size
     h_featmap = img.shape[-1] // patch_size
+    
+    # Make the prediction
+    with torch.no_grad():
+        model.eval()
+        outputs, attentions = model(img)
+        _, preds = torch.max(outputs, dim=1)
+        nh = attentions.shape[2]  # number of heads
+        nl = attentions.shape[1]  # number of layers
 
-    outputs, attentions = model(img)
-    _, preds = torch.max(outputs, dim=1)
-    nh = attentions.shape[2]  # number of heads
-    nl = attentions.shape[1]  # number of layers
+        atts = torch.zeros(nl, nh, attentions.shape[-1] - 1, attentions.shape[-1] - 1)  # Initialize the result tensor
 
-    atts = torch.zeros(nl, nh, attentions.shape[-1] - 1, attentions.shape[-1] - 1)  # Initialize the result tensor
+        for i in range(nl):
+            att = attentions[0, i, :, 0, 1:].reshape(nh, -1)
+            att = att.reshape(nh, w_featmap, h_featmap)
+            att = nn.functional.interpolate(att.unsqueeze(0), scale_factor=patch_size, mode="bilinear")[0]
+            atts[i, :, :, :] = att
 
-    for i in range(nl):
-        att = attentions[0, i, :, 0, 1:].reshape(nh, -1)
-        att = att.reshape(nh, w_featmap, h_featmap)
-        att = nn.functional.interpolate(att.unsqueeze(0), scale_factor=patch_size, mode="bilinear")[0]
-        atts[i, :, :, :] = att
-
-    atts = atts.cpu().numpy()
-    model.clear()
-    return preds.cpu().numpy(), atts
+        model.clear()
+    return preds.cpu().numpy()[0], atts.cpu().numpy()
 
 def visualize_all_layer_head_attention_maps(model, img, img_size, patch_size, device):
     """
-    Visualize attention maps for all layers and heads in a pre-trained model.
+    Visualize attention maps for all layers and heads in a pre-trained AIO.
 
     Parameters:
     - model: Pre-trained AIO.
@@ -125,10 +128,9 @@ def get_attention_maps_across_weights(model, img, img_size, patch_size, depth, w
     """
     Visualize attention maps for multiple weight files of a Vision Transformer model.
 
-    This function generates visualizations for attention maps across different layers and heads of a Vision Transformer
-    model trained with multiple weight files. It displays attention maps for each weight file in separate rows and
-    for each layer in separate columns. The function utilizes the provided image, image size, patch size, depth,
-    list of weight files, and device.
+    This function generates visualizations for attention maps across different layers and heads 
+    of multiple AIOs. It displays attention maps for each weight file in separate rows and
+    for each layer in separate columns.
 
     Parameters:
     model (torch.nn.Module): The Vision Transformer model.
@@ -184,8 +186,7 @@ def get_attention_maps_with_deviation(img, weight_files, image_size, depth, patc
     """
     Visualize attention maps for multiple weight files of a Vision Transformer model.
 
-    This function generates visualizations for attention maps across different layers and heads of a Vision Transformer
-    model trained with multiple weight files. It displays the deviation of attention maps from the average attention
+    This function generates visualizations for attention maps across different layers and heads of a AIO. It displays the deviation of attention maps from the average attention
     maps across all weight files. The function takes an input image, a list of weight files, image size, depth of
     the model, patch size, and the device to run the model on.
 
@@ -226,7 +227,7 @@ def get_attention_maps_with_deviation(img, weight_files, image_size, depth, patc
         # Iterate over each layer of the model
         for j in range(depth + 1):
             if j != 0:
-                # Visualize attention for the current layer and head
+                # get attention for the current layer and mean head
                 _, attention = get_attention_maps(model, img_tensor, patch_size, device)
                 attention = attention[j - 1]
                 att_mean = np.mean(attention, 0)
