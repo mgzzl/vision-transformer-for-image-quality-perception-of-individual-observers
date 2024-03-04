@@ -69,7 +69,7 @@ def main():
     csv_files = [file for file in os.listdir(csv_directory) if file.endswith(".csv")]
 
     # Define rating labels
-    rating_labels = {1: "Bad", 2: "poor", 3: "Fair", 4: "Good", 5: "Excellent"}
+    rating_labels = {1: "Bad", 2: "Poor", 3: "Fair", 4: "Good", 5: "Excellent"}
 
     # Process each CSV file in the directory
     for csv_file in csv_files:
