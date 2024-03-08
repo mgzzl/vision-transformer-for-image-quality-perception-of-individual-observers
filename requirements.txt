@@ -6,3 +6,5 @@ einops
 torch
 torchvision
 seaborn
+pillow
+scipy
