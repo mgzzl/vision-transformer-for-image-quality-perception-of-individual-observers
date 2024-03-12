@@ -1,0 +1,13 @@
+Weights File,Accuracy,MSE,MSE weighted,Mean Entropy,Mean KL Divergence,Classification Report
+AIO0.pth,0.95,0.05,0.0414794952742511,0.09239398,0.1020401157438755,"              precision    recall  f1-score   support
+
+         bad       1.00      1.00      1.00        60
+insufficient       0.97      0.98      0.98        60
+        fair       0.97      0.93      0.95        60
+        good       0.89      0.92      0.90        60
+   excellent       0.93      0.92      0.92        60
+
+    accuracy                           0.95       300
+   macro avg       0.95      0.95      0.95       300
+weighted avg       0.95      0.95      0.95       300
+"
