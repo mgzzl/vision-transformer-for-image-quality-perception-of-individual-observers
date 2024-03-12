@@ -29,6 +29,8 @@ Notebook for evaluating
 ```
 jupyter notebook ViT-IQA_eval.ipynb
 ```
+## Download
+The results and weights of all AIOs of the selected approach can be downloaded [here](https://nextcloud.th-deg.de/s/JokosT8agMc6icF).
 
 ## Support
 For comments, questions and help I can be reached at the following email adress: max.geissler@stud.th-deg.de
