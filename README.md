@@ -4,7 +4,7 @@
 This project presents individual image quality assessment using Vision Transformer (ViT). Building on previous research on predicting quality ratings of compressed images with CNN models, this work aims to develop a model for predicting image quality from individual observers using ViT. The model presented in the paper "[Vision Transformer for Small-Size Datasets](https://arxiv.org/abs/2112.13492)" has been integrated into this work for performance improvments on small-size datasets. In addition, visualization of the Vision Transformer's attention mechanism could provide better insight into the human visual system.
 
 ## Visuals
-Images
+![Attentionmap comparison between all AIOs for the prediction of the quality of two images](results/Attention_maps/comparisons/focus_layer_6_attention_comparison.png)
 
 ## Requirements
 - Linux and Windows are supported, but I recommend Linux for performance and compatibility reasons.
