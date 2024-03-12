@@ -21,8 +21,13 @@ pip install -r requirements.txt
 ```
 
 ## Usage
+Notebook for training
 ```
-jupyter notebook
+jupyter notebook ViT-IQA.ipynb
+```
+Notebook for evaluating
+```
+jupyter notebook ViT-IQA_eval.ipynb
 ```
 
 ## Support
