@@ -159,8 +159,7 @@ if __name__ == "__main__":
 
     batch_size = 128
 
-    # Define model and device
-    model = create_vit_model(image_size=image_size, patch_size=patch_size, num_classes=num_classes, depth=depth)
+    # Define device
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     # Define dataset parameters
@@ -174,7 +173,7 @@ if __name__ == "__main__":
     # Testdataset
     dataset_root = 'assets/Test/DSX'
 
-    # Define the normalization parameters (mean and std)
+    # Define the normalization parameters
     mean = [0.485, 0.456, 0.406]
     std = [0.229, 0.224, 0.225]
 
@@ -197,7 +196,7 @@ if __name__ == "__main__":
         results.append(result)
 
     # Save results to a CSV file
-    output_csv_file = 'evaluation_results.csv'
+    output_csv_file = f'evaluation_results.csv'
     output_csv_path = os.path.join(weights_dir, output_csv_file)
     save_results_to_csv(results, output_csv_path)
     print(f"Results saved to '{output_csv_path}'")

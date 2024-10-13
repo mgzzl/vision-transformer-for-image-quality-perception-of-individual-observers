@@ -53,7 +53,7 @@ def compare_csv_files(file1_path, file2_path):
 
 # Example of how to use the compare_csv_files function:
 if __name__ == "__main__":
-    file1_path = '/home/maxgan/WORKSPACE/UNI/BA_Pavel/matlab/results_csv/Obs4/nictac01-04-2023.csv'
-    file2_path = '/home/maxgan/WORKSPACE/UNI/BA_Pavel/matlab/results_csv/Obs4.0/nictacTest10-01-2023.csv'
+    file1_path = 'BA_Pavel/matlab/results_csv/Obs4/nictac01-04-2023.csv'
+    file2_path = 'BA_Pavel/matlab/results_csv/Obs4.0/nictacTest10-01-2023.csv'
     compare_csv_files(file1_path, file2_path)
 

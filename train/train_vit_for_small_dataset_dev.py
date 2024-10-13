@@ -1,3 +1,9 @@
+# _________________________________________________________________________
+# 
+# [Deprecated] Please use 'ViT-IQA.ipynb' instead.
+# _________________________________________________________________________
+# 
+
 import math
 import torch
 import torch.nn as nn
@@ -41,28 +47,7 @@ def train_vit_model(csv_file, dataset_root, results_path, num_epochs=10, batch_s
 
     # Create the dataset object
     dataset = ImageQualityDataset(csv_file,dataset_root,transform=transform)
-
-    ############################# VISUALISATION #############################
-    if vis:
-        # Get an example image and its label
-        example_idx = 0  # Change this index to see different examples
-        example_image, example_label = dataset[example_idx]
-        print(f"Image {example_image} has a rating of {example_label+1}")
-        # Reverse the normalization to visualize the image
-        mean = torch.tensor([0.485, 0.456, 0.406])
-        std = torch.tensor([0.229, 0.224, 0.225])
-        example_image = example_image * std[:, None, None] + mean[:, None, None]
-        example_image = example_image.clamp(0, 1)
-
-        # Convert the torch tensor to a numpy array for plotting
-        example_image_np = example_image.numpy().transpose(1, 2, 0)
-
-        # Plot the example image
-        plt.imshow(example_image_np)
-        plt.title(f"Example Image (Quality Level {example_label+1})")
-        plt.axis('off')
-        plt.show()
-
+    
     test_size = 0.2
     num_train = int(len(dataset)* (1-test_size))
     num_val = len(dataset) - num_train
@@ -191,18 +176,18 @@ def train_vit_model(csv_file, dataset_root, results_path, num_epochs=10, batch_s
 #Define the paths to dataset directory and results directory
 
 #OBJETIVE
-# dataset_root = '/home/maxgan/WORKSPACE/UNI/BA/TIQ/assets/DatasetObjective/allDistorted'
-# csv_file = '/home/maxgan/WORKSPACE/UNI/BA/TIQ/assets/DatasetObjective/objective_imagesquality_scores.csv'
+# dataset_root = 'assets/DatasetObjective/allDistorted'
+# csv_file = 'assets/DatasetObjective/objective_imagesquality_scores.csv'
 
 #SUBJECTIVE
-dataset_root = '/home/maxgan/WORKSPACE/UNI/BA/TIQ/assets/DatasetSubjective/Persons/Person_1_shinyx/imgs'
-csv_file = '/home/maxgan/WORKSPACE/UNI/BA/TIQ/assets/DatasetSubjective/Persons/Person_1_shinyx/img_scores.csv'
+dataset_root = 'assets/DatasetSubjective/Persons/Person_1_shinyx/imgs'
+csv_file = 'assets/DatasetSubjective/Persons/Person_1_shinyx/img_scores.csv'
 
 #RESULTS
-results_path = '/home/maxgan/WORKSPACE/UNI/BA/TIQ/results'
+results_path = 'results'
 
 #PRETRAINED PATH
-pretrained_model = '/home/maxgan/WORKSPACE/UNI/BA/TIQ/results/vit_model_20230713_231903_Epochs_35_batchsize_64_allDistorted.pth'
+pretrained_model = 'results/vit_model_20230713_231903_Epochs_35_batchsize_64_allDistorted.pth'
 # pretrained_model = None
 
 # Run the training process

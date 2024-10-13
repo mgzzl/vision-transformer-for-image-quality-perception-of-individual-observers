@@ -44,8 +44,7 @@ def combine_csv_files(directory):
     print(f"Combined CSV file saved at: {output_file_path}")
     print(f"Number of not unique rows: {d}")
 
-# Example of how to use the combine_csv_files function:
 if __name__ == "__main__":
-    root_directory = '/home/maxgan/WORKSPACE/UNI/BA_Pavel/matlab/results_csv/Obs4'
+    root_directory = 'BA_Pavel/matlab/results_csv/Obs4'
     combine_csv_files(root_directory)
 

@@ -1,6 +1,9 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import os
+import sys
+
+sys.path.append('/home/maxgan/WORKSPACE/UNI/BA/vision-transformer-for-image-quality-perception-of-individual-observers')
 
 def generate_bar_chart_from_csv(csv_directory, csv_file, rating_labels):
     """
@@ -63,7 +66,7 @@ def generate_bar_chart_from_csv(csv_directory, csv_file, rating_labels):
 
 def main():
     # Directory containing the CSV files
-    csv_directory = "/home/maxgan/WORKSPACE/UNI/BA/vision-transformer-for-image-quality-perception-of-individual-observers/assets/Test"
+    csv_directory = "assets/Test"
 
     # Get a list of all CSV files in the directory
     csv_files = [file for file in os.listdir(csv_directory) if file.endswith(".csv")]

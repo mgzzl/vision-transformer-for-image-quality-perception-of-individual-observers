@@ -68,8 +68,7 @@ def process_directory(directory, output_directory):
             mat_file_path = os.path.join(directory, file_name)
             save_sorttable_to_csv(mat_file_path, output_directory)
 
-# Example of how to use the process_directory function:
 if __name__ == "__main__":
-    directory = '/home/maxgan/WORKSPACE/UNI/BA_Pavel/matlab/results_csv/Obs4.0'
-    output_directory = '/home/maxgan/WORKSPACE/UNI/BA_Pavel/matlab/results_csv/Obs4.0'
+    directory = 'BA_Pavel/matlab/results_csv/Obs4.0'
+    output_directory = 'BA_Pavel/matlab/results_csv/Obs4.0'
     process_directory(directory, output_directory)

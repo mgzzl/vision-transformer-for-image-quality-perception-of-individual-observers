@@ -48,7 +48,6 @@ def check_image_existence(csv_file_path, image_folder_path):
 
         return exist_count, not_exist_count, not_exist_images
 
-# Example of how to use the check_image_existence function:
 if __name__ == "__main__":
     # Configuration variables
     csv_file_path = 'assets/Test/AccTestCsv/Obs4AccTest.csv'
