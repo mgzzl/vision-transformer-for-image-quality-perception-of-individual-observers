@@ -1,10 +1,12 @@
 import os
 from torch.utils.data import Dataset
+import torchvision.transforms as transforms
 from PIL import Image
 import numpy as np
 from itertools import combinations
 from misc.visualization import get_attention_maps, normalize_attention_maps
 from misc.helpers import trans_norm2tensor, create_vit_model
+from misc import transformations
 import csv
 
 class ImageAttentionGlobalAvgDataset(Dataset):
@@ -44,8 +46,8 @@ class ImageAttentionGlobalAvgDataset(Dataset):
         """
         all_global_avgs = []
         for image_filename in self.image_filenames:
-            global_avg, average_attention_map = self._compute_global_avg(image_filename)
-            all_global_avgs.append({'filename': image_filename, 'global_avg': global_avg, 'average_attention_map': average_attention_map})
+            global_avg, average_attention_map, org_img, att_maps = self._compute_global_avg(image_filename)
+            all_global_avgs.append({'filename': image_filename, 'global_avg': global_avg, 'average_attention_map': average_attention_map, 'org_img': org_img, 'att_maps': att_maps})
         return all_global_avgs
 
     def _compute_global_avg(self, image_filename):
@@ -60,6 +62,7 @@ class ImageAttentionGlobalAvgDataset(Dataset):
         """
         image_path = os.path.join(self.images_dir, image_filename)
         img = Image.open(image_path)
+        org_img = img.copy()
         img_tensor = trans_norm2tensor(img, self.image_size)
 
         img_attentions = []
@@ -81,7 +84,7 @@ class ImageAttentionGlobalAvgDataset(Dataset):
         # Calculate average attention map and global average
         average_attention_map = np.mean(absolute_difference_attentions, axis=0)
         global_avg = np.mean(average_attention_map)
-        return global_avg, average_attention_map
+        return global_avg, average_attention_map, org_img, img_attentions
 
     def __len__(self):
         return len(self.image_filenames)
