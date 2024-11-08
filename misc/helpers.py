@@ -130,13 +130,14 @@ def calculate_label_distributions(labels, device, sigma=0.7**2, num_classes=5):
     return true_distributions
 
 
-def trans_norm2tensor(img, img_size):
+def trans_norm2tensor(img, img_size, transformation_function=None):
     """
-    Transform and normalize the input image to a PyTorch tensor.
+    Transform, normalize, and apply a chosen transformation to the input image.
 
     Parameters:
     - img (PIL.Image): Input image.
     - img_size (int): Desired size for the image.
+    - transformation_function (function, optional): Function that applies a transformation to a part of the image. If None, no additional transformation is applied.
 
     Returns:
     torch.Tensor: Transformed and normalized image tensor.
@@ -145,47 +146,69 @@ def trans_norm2tensor(img, img_size):
     if img.mode == 'L':
         img = img.convert('RGB')
 
-    # Define the normalization parameters (mean and std)
+    # Define the normalization parameters (mean and std) - ImageNet
     mean = torch.tensor([0.485, 0.456, 0.406])
     std = torch.tensor([0.229, 0.224, 0.225])
 
-    # Define the transformation including normalization
+    # Define the transformation including resizing, center cropping, and normalization
     transform = transforms.Compose([
         transforms.Resize(img_size),
         transforms.CenterCrop(img_size),
-        # transforms.RandomHorizontalFlip(),
-        transforms.ToTensor(),
-        transforms.Normalize(mean=mean, std=std)
     ])
 
+    # Apply the basic transformations (resize, center crop)
     img = transform(img)
+
+    # Apply the optional additional transformation on a part of the image
+    if transformation_function is not None:
+        # Convert back to PIL Image for applying the part-transformation
+        # img_pil = transforms.ToPILImage()(img)
+        
+        # Apply the selected transformation (e.g., Grayscale Patch, Blur Patch)
+        img = transformation_function(img)
+        
+        # Convert the PIL image back to Tensor and normalize
+        # img = transforms.ToTensor()(img_pil)
+
+    img = transforms.ToTensor()(img)
+    # Normalize the image
+    img = transforms.Normalize(mean=mean, std=std)(img)
+
     return img
 
-def prev_img(img, img_size):
+def prev_img(img, img_size, transformation_function=None):
     """
     Process the image for previewing purposes.
 
-    This function applies transformations to resize and center crop the input image to a specified size.
+    This function applies transformations to resize, center crop the input image, 
+    and optionally apply additional transformations to a part of the image.
 
     Parameters:
-    img (PIL.Image): The input image.
-    img_size (int): The desired size of the output image.
+    - img (PIL.Image): The input image.
+    - img_size (int): The desired size of the output image.
+    - transformation_function (function, optional): A function that applies a transformation 
+      to a part of the image. If None, no additional transformation is applied.
 
     Returns:
-    img (PIL.Image): The processed image.
+    img (PIL.Image): The processed and optionally transformed image.
     """
-    # Define the transformation
+    # Define the transformation for resizing and center cropping
     transform = transforms.Compose([
         transforms.Resize(img_size),     # Resize the image
         transforms.CenterCrop(img_size), # Center crop the image
     ])
-    # Apply the transformation to the image
+    
+    # Apply the resize and center crop transformation
     img = transform(img)
+
+    # Apply the optional additional transformation on a part of the image
+    if transformation_function is not None:
+        img = transformation_function(img)  # Apply the transformation to a specific area of the image
 
     return img
 
 
-def prev_img_gray(img, img_size):
+def prev_img_gray(img, img_size, transformation_function=None):
     """
     Process the image for previewing purposes with grayscale and contrast adjustment.
 
@@ -206,6 +229,15 @@ def prev_img_gray(img, img_size):
     ])
     # Apply the transformation to the input image
     img = transform(img)
+
+        # Apply the optional additional transformation on a part of the image
+    if transformation_function is not None:
+        # Apply the selected transformation (e.g., Grayscale Patch, Blur Patch)
+        img = transformation_function(img)
+        
+        # Convert the PIL image back to Tensor and normalize
+        # img = transforms.ToTensor()(img_pil)
+
     # Convert the image to grayscale
     img_bw = img.convert('L')
 
@@ -253,7 +285,7 @@ def get_image_paths_from_csv(csv_file_path, num_files):
 
     Parameters:
     csv_file_path (str): The path to the CSV file.
-    num_files (int): The number of image paths to extract.
+    num_files (int): The number of image paths to extract. 0 means extract all.
 
     Returns:
     image_paths (list): A list of paths to the image files extracted from the CSV.
@@ -275,7 +307,7 @@ def get_image_paths_from_csv(csv_file_path, num_files):
             print(f"Visualizing {image_filename} with a global avg of {global_avg}")
             image_path = os.path.join(directory_path, image_filename)
             image_paths.append(image_path)
-
+            
             # Break the loop when the desired number of files is reached
             if len(image_paths) == num_files:
                 break

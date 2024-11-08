@@ -8,6 +8,9 @@ from model.recorder import Recorder
 import seaborn as sns
 from PIL import Image
 
+from misc import transformations
+
+
 def normalize_attention_maps(attentions):
     """
     Normalize 2D attention maps to the range [0, 1].
@@ -55,15 +58,22 @@ def get_attention_maps(model, img, patch_size, device):
         nh = attentions.shape[2]  # number of heads
         nl = attentions.shape[1]  # number of layers
 
+        # Initialize the result tensor for attention maps
+        # (nl, nh, w_featmap, h_featmap) 
+        # attens.shape[-1] - 1 is the number of tokens (cls + patches) - 1 (exclude cls)
         atts = torch.zeros(nl, nh, attentions.shape[-1] - 1, attentions.shape[-1] - 1)  # Initialize the result tensor
 
+        # Extract attention maps for each layer and head
         for i in range(nl):
+            # Extract attention maps for each head in the current layer
+            # attentions[0, i, :, 0, 1:] is the attention map for the first token ([CLS] token) in the current layer - cls-to-patch attention
             att = attentions[0, i, :, 0, 1:].reshape(nh, -1)
             att = att.reshape(nh, w_featmap, h_featmap)
             att = nn.functional.interpolate(att.unsqueeze(0), scale_factor=patch_size, mode="bilinear")[0]
             atts[i, :, :, :] = att
 
         model.clear()
+
     return preds.cpu().numpy()[0], atts.cpu().numpy()
 
 def visualize_all_layer_head_attention_maps(model, img, img_size, patch_size, device):
@@ -77,6 +87,7 @@ def visualize_all_layer_head_attention_maps(model, img, img_size, patch_size, de
     - patch_size (int): Size of image patches for attention computation.
     - device (torch.device): Device on which the model is loaded.
     """
+    # img_pre = transformations.apply_blur_patch(img, (100,100))
     img_pre = trans_norm2tensor(img, img_size)
     _, attention = get_attention_maps(model, img_pre, patch_size, device)
     plot_attention_maps_per_layer_and_heads(img, attention)
@@ -93,6 +104,7 @@ def plot_attention_maps_per_layer_and_heads(img, attention):
     n_layers = attention.shape[0]
     image_size = 256
 
+    img = transformations.apply_blur_patch(img, (100,100))
     img_pre = prev_img(img, image_size)
     img_gray = prev_img_gray(img, image_size)
 
@@ -264,7 +276,87 @@ def get_attention_maps_with_deviation(img, weight_files, image_size, depth, patc
     plt.show()
 
 
-def plot_attention_maps_comparison(weight_files, image_paths, image_size, patch_size, output_dir, layer_idx, device):
+# def plot_attention_maps_comparison(weight_files, image_paths, image_size, patch_size, output_dir, layer_idx, device):
+#     """
+#     Plot attention maps for multiple weight files and input images.
+
+#     This function generates visualizations for attention maps across multiple weight files and input images.
+#     It takes a list of weight files, a list of image paths, image size, patch size, output directory, layer index,
+#     and device to run the model on. For each input image, it calculates the attention maps for each weight file and
+#     visualizes the deviation of attention maps from the mean attention map across all weight files.
+
+#     Parameters:
+#     weight_files (list): A list of paths to weight files used for visualization.
+#     image_paths (list): A list of paths to input images for visualization.
+#     image_size (int): The size of the input images.
+#     patch_size (int): The size of the image patches used in the Vision Transformer.
+#     output_dir (str): The directory path to save the generated visualizations.
+#     layer_idx (int): The index of the layer for which attention maps are visualized (-1 for the last layer).
+#     device (torch.device): The device to run the model on (e.g., CPU or GPU).
+
+#     Returns:
+#     None: This function does not return any value. It directly saves the generated visualizations.
+#     """
+#     # Initialize Matplotlib figures
+#     num_weights = len(weight_files)
+#     num_images = len(image_paths)
+    
+#     fig, axes = plt.subplots(num_images, num_weights + 1, figsize=(3 * (num_weights + 1), 2.5 * num_images))
+    
+#     for ax in axes.flat:
+#         ax.axis('off')
+    
+#     # Iterate over each input image
+#     for j, image_path in enumerate(image_paths):
+#         img = Image.open(image_path)
+#         img_prev = prev_img(img, image_size)
+#         img_gray = prev_img_gray(img, image_size)
+
+#         aio_attentions = []
+#         # Get attention maps for each weight file
+#         for n in range(num_weights):
+#             model = create_vit_model(weights_path=weight_files[n])
+#             img_tensor = trans_norm2tensor(img, image_size)
+#             _, attention = get_attention_maps(model, img_tensor, patch_size, device)
+            
+#             # Determine the layer index
+#             if layer_idx == -1:
+#                 layer_idx = attention.shape[0] - 1
+                
+#             att_ll = attention[layer_idx]  # num_heads, seq_len, seq_len
+#             att_mean = np.mean(att_ll, 0)
+#             att_ll_norm = normalize_attention_maps(att_mean)
+
+#             # Remove x% lowest attention values
+#             # att_ll_norm = np.where(att_ll_norm < np.max(att_ll_norm) * 0.2, 0, att_ll_norm)
+
+#             aio_attentions.append(att_ll_norm)
+
+#         # Calculate mean attention maps and deviation
+#         mean_aio_atts = np.mean(aio_attentions, axis=0)
+#         atts_sub = np.subtract(aio_attentions, mean_aio_atts)
+        
+#         # Plotting
+#         for i in range(len(atts_sub) + 1):
+#             ax = axes[j, i]
+#             if i != 0:
+#                 ax.imshow(img_gray)
+#                 sns.heatmap(atts_sub[i - 1], cmap="seismic", alpha=0.8, ax=ax, vmin=-1, vmax=1)
+#                 ax.set_title(f'{os.path.splitext(os.path.basename(weight_files[i - 1]))[0]} Layer {layer_idx + 1} Attention')
+#             else:
+#                 ax.imshow(img_prev)
+#                 ax.set_title('Original Image')
+    
+#     # Save the visualizations
+#     os.makedirs(output_dir, exist_ok=True)
+#     fig_path = os.path.join(output_dir, f"{os.path.basename(os.path.dirname(image_paths[0]))}_layer_{layer_idx + 1}_attention_comparison.png")
+#     plt.tight_layout()
+#     plt.savefig(fig_path)
+#     plt.show()
+
+
+
+def plot_attention_maps_comparison(weight_files, imgs, image_size, patch_size, output_dir, layer_idx, device):
     """
     Plot attention maps for multiple weight files and input images.
 
@@ -287,7 +379,7 @@ def plot_attention_maps_comparison(weight_files, image_paths, image_size, patch_
     """
     # Initialize Matplotlib figures
     num_weights = len(weight_files)
-    num_images = len(image_paths)
+    num_images = len(imgs)
     
     fig, axes = plt.subplots(num_images, num_weights + 1, figsize=(3 * (num_weights + 1), 2.5 * num_images))
     
@@ -295,8 +387,8 @@ def plot_attention_maps_comparison(weight_files, image_paths, image_size, patch_
         ax.axis('off')
     
     # Iterate over each input image
-    for j, image_path in enumerate(image_paths):
-        img = Image.open(image_path)
+    for j, img in enumerate(imgs):
+        # img = Image.open(image_path)
         img_prev = prev_img(img, image_size)
         img_gray = prev_img_gray(img, image_size)
 
@@ -337,7 +429,8 @@ def plot_attention_maps_comparison(weight_files, image_paths, image_size, patch_
     
     # Save the visualizations
     os.makedirs(output_dir, exist_ok=True)
-    fig_path = os.path.join(output_dir, f"{os.path.basename(os.path.dirname(image_paths[0]))}_layer_{layer_idx + 1}_attention_comparison.png")
+    # fig_path = os.path.join(output_dir, f"{os.path.basename(os.path.dirname(image_paths[0]))}_layer_{layer_idx + 1}_attention_comparison.png")
+    fig_path = os.path.join(output_dir, f"layer_{layer_idx + 1}_attention_comparison.png")
     plt.tight_layout()
     plt.savefig(fig_path)
     plt.show()
