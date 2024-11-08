@@ -77,3 +77,18 @@ class ImageQualityDataset(Dataset):
                 return label
         # Handle the case where the image_path is not found
         raise ValueError(f"Image path '{image_path}' not found in the dataset.")
+    
+    def get_image_paths_by_label(self, label):
+        """
+        Get the image paths corresponding to a specific label.
+        
+        Parameters:
+        label (int): The label for which to retrieve image paths.
+        
+        Returns:
+        list: List of image paths corresponding to the specified label.
+        """
+        
+        image_paths = [path for path, lbl in self.image_files if lbl == label]
+        
+        return image_paths
