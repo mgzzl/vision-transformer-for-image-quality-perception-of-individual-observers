@@ -302,12 +302,44 @@ def get_image_paths_from_csv(csv_file_path, num_files):
         next(reader)  # Skip the header row
         for row in reader:
             image_filename = row[0]
-            global_avg = row[1]  # Assuming the global average is stored in the second column
             # Print visualization information
-            print(f"Visualizing {image_filename} with a global avg of {global_avg}")
             image_path = os.path.join(directory_path, image_filename)
             image_paths.append(image_path)
             
+            # Break the loop when the desired number of files is reached
+            if len(image_paths) == num_files:
+                break
+
+    return image_paths
+
+def get_image_filenames_by_label(csv_file_path, label:int, img_directory_path, num_files=0):
+    """
+    Get a list of image paths from a CSV file containing image filenames.
+
+    Parameters:
+    csv_file_path (str): The path to the CSV file.
+    label (str): The label to filter the images by.
+    img_directory_path (str): The path to the directory containing the image files.
+    num_files (int): The number of image paths to extract. 0 means extract all.
+
+    Returns:
+    image_filenames (list): A list of paths to the image files extracted from the CSV.
+    """
+    # Initialize a list to store the image paths
+    image_paths = []
+
+    # Read the CSV file and extract the image filenames
+    with open(csv_file_path, 'r') as csvfile:
+        reader = csv.reader(csvfile)
+        next(reader)  # Skip the header row
+        for row in reader:
+            image_filename = row[0]
+            vote = row[1]
+            # fitler only images with vote of 5
+            if int(vote) == label:
+                image_path = os.path.join(img_directory_path, image_filename)
+                image_paths.append(image_path)
+
             # Break the loop when the desired number of files is reached
             if len(image_paths) == num_files:
                 break

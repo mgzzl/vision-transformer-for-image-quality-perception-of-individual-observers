@@ -126,7 +126,7 @@ def apply_contrast_patch(img, crop_size=(50, 50), contrast_factor=2, crop_pos=No
     img.paste(patch, bbox)
     return img
 
-def apply_compression_patch(img, crop_size=(50, 50), quality=10, crop_pos=None):
+def apply_compression_patch(img, crop_size=(50, 50), quality=25, crop_pos=None):
     """Compress a random part of the image."""
     img = img.copy()
     bbox = get_random_bbox(img, crop_size, crop_pos=crop_pos)
