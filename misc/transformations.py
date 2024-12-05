@@ -57,21 +57,14 @@ def get_random_bbox(img:Image, crop_size=(50, 50), crop_pos=None):
     return (left, top, right, bottom)
 
 # Transformationen für Teilbereiche definieren
-def apply_random_crop(img, crop_size=(50, 50), crop_pos=None):
-    """Randomly crop a part of the image and replace it with a uniform color."""
+def apply_occlusion_patch(img, crop_size=(50, 50), crop_pos=None):
+    """crop a part of the image and replace it with a uniform color."""
     img = img.copy()
     bbox = get_random_bbox(img, crop_size, crop_pos=crop_pos)
     img = img.convert("RGB")  # Ensures the image is in RGB mode
 
     # black
-    # img.paste((0, 0, 0), bbox)
-
-    # white
-    # img.paste((255, 255, 255), bbox)
-
-    # random color
-    random_color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
-    img.paste(random_color, bbox)
+    img.paste((0, 0, 0), bbox)
 
     return img
 
@@ -85,7 +78,7 @@ def apply_grayscale_patch(img, crop_size=(50, 50), crop_pos=None):
     return img
 
 def apply_blur_patch(img, crop_size=(50, 50), blur_radius=5, crop_pos=None):
-    """Apply a blur effect to a random part of the image."""
+    """Apply a blur effect to a part of the image based on crop position."""
     img = img.copy()
     bbox = get_random_bbox(img, crop_size, crop_pos=crop_pos)
     patch = img.crop(bbox)
@@ -94,7 +87,7 @@ def apply_blur_patch(img, crop_size=(50, 50), blur_radius=5, crop_pos=None):
     return img
 
 def apply_noise_patch(img, crop_size=(50, 50), crop_pos=None):
-    """Apply noise to a random part of the image."""
+    """Apply noise to a part of the image based on crop position."""
     img = img.copy()
     bbox = get_random_bbox(img, crop_size, crop_pos=crop_pos)
     patch = img.crop(bbox)
@@ -107,7 +100,7 @@ def apply_noise_patch(img, crop_size=(50, 50), crop_pos=None):
     return img
 
 def apply_brightness_patch(img, crop_size=(50, 50), brightness_factor=2, crop_pos=None):
-    """Adjust the brightness of a random part of the image."""
+    """Adjust the brightness of a part of the image based on crop position."""
     img = img.copy()
     bbox = get_random_bbox(img, crop_size, crop_pos=crop_pos)
     patch = img.crop(bbox)
@@ -117,7 +110,7 @@ def apply_brightness_patch(img, crop_size=(50, 50), brightness_factor=2, crop_po
     return img
 
 def apply_contrast_patch(img, crop_size=(50, 50), contrast_factor=2, crop_pos=None):
-    """Adjust the contrast of a random part of the image."""
+    """Adjust the contrast of a part of the image based on crop position."""
     img = img.copy()
     bbox = get_random_bbox(img, crop_size, crop_pos=crop_pos)
     patch = img.crop(bbox)
@@ -127,7 +120,7 @@ def apply_contrast_patch(img, crop_size=(50, 50), contrast_factor=2, crop_pos=No
     return img
 
 def apply_compression_patch(img, crop_size=(50, 50), quality=25, crop_pos=None):
-    """Compress a random part of the image."""
+    """Compress a part of the image based on crop position."""
     img = img.copy()
     bbox = get_random_bbox(img, crop_size, crop_pos=crop_pos)
     patch = img.crop(bbox)
