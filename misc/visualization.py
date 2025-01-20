@@ -57,7 +57,7 @@ def get_attention_maps(model, img, patch_size, device):
         _, preds = torch.max(outputs, dim=1)
         nh = attentions.shape[2]  # number of heads
         nl = attentions.shape[1]  # number of layers
-
+        print("Attention Shape", attentions)
         # Initialize the result tensor for attention maps
         # (nl, nh, w_featmap, h_featmap) 
         # attens.shape[-1] - 1 is the number of tokens (cls + patches) - 1 (exclude cls)
@@ -68,10 +68,15 @@ def get_attention_maps(model, img, patch_size, device):
             # Extract attention maps for each head in the current layer
             # attentions[0, i, :, 0, 1:] is the attention map for the first token ([CLS] token) in the current layer - cls-to-patch attention
             att = attentions[0, i, :, 0, 1:].reshape(nh, -1)
+            print("attentions", att.shape) 
             att = att.reshape(nh, w_featmap, h_featmap)
+            print("attentions", att.shape) 
             att = nn.functional.interpolate(att.unsqueeze(0), scale_factor=patch_size, mode="bilinear")[0]
+            print("attentions", att.shape) 
             atts[i, :, :, :] = att
 
+
+        print("Attention Shape after reshaping", atts.shape)
         model.clear()
 
     return preds.cpu().numpy()[0], atts.cpu().numpy()
